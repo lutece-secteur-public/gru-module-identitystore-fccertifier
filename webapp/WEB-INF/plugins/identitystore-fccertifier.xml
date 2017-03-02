@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><plug-in>
+    <name>identitystore-fccertifier</name>
+    <class>fr.paris.lutece.plugins.identitystore.modules.fccertifier.IdentityStoreFranceConnectCertifierPlugin</class>
+    <version>1.0.0-SNAPSHOT</version>
+    <documentation/>
+    <installation/>
+    <changes/>
+    <user-guide/>
+    <description>module.identitystore.fccertifier.module.description</description>
+    <provider>module.identitystore.fccertifier.module.provider</provider>
+    <provider-url>http://dev.lutece.paris.fr</provider-url>
+    <icon-url>images/admin/skin/plugins/identitystore/modules/fccertifier/franceconnect.png</icon-url>
+    <copyright>Copyright (c) 2017 Mairie de Paris</copyright>
+    
+    <!-- if the plugin must have a connection pool with parameter : 1 - yes, 0 - no -->
+    <db-pool-required>0</db-pool-required>
+    
+	<!-- Specific plugin Javascript files -->
+    <javascript-files>
+    </javascript-files>
+    
+    <!-- Specific plugin CSS stylesheet -->
+    <css-stylesheets>
+    </css-stylesheets>
+    
+    <!-- XPages parameters -->
+    <applications>
+         <application>
+            <application-id>fccertifier</application-id>
+            <application-class>fr.paris.lutece.plugins.identitystore.modules.fccertifier.web.FranceConnectCertifierApp</application-class>
+        </application>
+    </applications>
+</plug-in>
