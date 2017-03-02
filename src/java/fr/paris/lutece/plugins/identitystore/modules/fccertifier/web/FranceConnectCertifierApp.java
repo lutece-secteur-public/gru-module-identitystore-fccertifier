@@ -78,7 +78,6 @@ public class FranceConnectCertifierApp extends MVCApplication
     private static final String MARK_IDENTITY = "identity";
     
     private FranceConnectCertifierService _certifierService;
-    private UserInfo _fcUserInfo;
 
     /**
      * Constructor for init
@@ -123,16 +122,8 @@ public class FranceConnectCertifierApp extends MVCApplication
     {
         checkUserAuthentication( request );
 
-        _fcUserInfo = (UserInfo) request.getSession(  ).getAttribute( UserDataClient.ATTRIBUTE_USERINFO );
-
-        if ( _fcUserInfo == null )
-        {
-            String strUrl = DataClientService.instance(  ).getDataClientUrl( DATACLIENT_USER );
-
-            return redirect( request, strUrl );
-        }
-
-        return redirectView( request , VIEW_VALIDATE_FC_DATA );
+        String strUrl = DataClientService.instance(  ).getDataClientUrl( DATACLIENT_USER );
+        return redirect( request, strUrl );
     }
     
     /**
@@ -148,11 +139,10 @@ public class FranceConnectCertifierApp extends MVCApplication
         LuteceUser user = checkUserAuthentication( request );
         Map<String, Object> model = getModel();
         
-        _fcUserInfo = (UserInfo) request.getSession(  ).getAttribute( UserDataClient.ATTRIBUTE_USERINFO );
-        
+        UserInfo fcUserInfo = (UserInfo) request.getSession(  ).getAttribute( UserDataClient.ATTRIBUTE_USERINFO );
         IdentityDto identity = MyDashboardIdentityService.getIdentity( user.getName() );
         
-        model.put( MARK_FC_INFOS , _fcUserInfo );
+        model.put( MARK_FC_INFOS , fcUserInfo );
         model.put( MARK_IDENTITY , identity );
         
         return getXPage( TEMPLATE_VALIDATE_DATA , LocaleService.getDefault(  ), model );
@@ -165,9 +155,9 @@ public class FranceConnectCertifierApp extends MVCApplication
         throws UserNotSignedException
     {
         checkUserAuthentication( request );
-        _fcUserInfo = (UserInfo) request.getSession(  ).getAttribute( UserDataClient.ATTRIBUTE_USERINFO );
+        UserInfo fcUserInfo = (UserInfo) request.getSession(  ).getAttribute( UserDataClient.ATTRIBUTE_USERINFO );
 
-        ValidationResult result = _certifierService.validate( request, _fcUserInfo );
+        ValidationResult result = _certifierService.validate( request, fcUserInfo );
         
         if ( result != ValidationResult.OK )
         {
@@ -220,4 +210,5 @@ public class FranceConnectCertifierApp extends MVCApplication
         }
         return luteceUser;
     }
+    
 }

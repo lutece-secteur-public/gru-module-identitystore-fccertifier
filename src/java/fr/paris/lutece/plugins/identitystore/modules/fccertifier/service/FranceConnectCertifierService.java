@@ -250,6 +250,7 @@ public class FranceConnectCertifierService
         IdentityStoreService.setAttribute( identity, "family_name", infos.getFCUserInfo().getFamilyName(), author, certificate );
         IdentityStoreService.setAttribute( identity, "birthplace", infos.getFCUserInfo().getBirthPlace(), author, certificate );
         IdentityStoreService.setAttribute( identity, "birthdate", infos.getFCUserInfo().getBirthDate(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "given_name", infos.getFCUserInfo().getGivenName(), author, certificate );
 
         if ( AppPropertiesService.getPropertyBoolean( PROPERTY_API_MANAGER_ENABLED, true ) )
         {
