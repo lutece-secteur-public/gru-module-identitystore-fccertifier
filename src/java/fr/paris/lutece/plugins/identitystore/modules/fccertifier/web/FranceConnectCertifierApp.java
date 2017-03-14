@@ -35,10 +35,12 @@ package fr.paris.lutece.plugins.identitystore.modules.fccertifier.web;
 
 import fr.paris.lutece.plugins.franceconnect.oidc.UserInfo;
 import fr.paris.lutece.plugins.franceconnect.service.DataClientService;
+import fr.paris.lutece.plugins.identitystore.modules.fccertifier.business.FcIdentity;
 import fr.paris.lutece.plugins.identitystore.modules.fccertifier.dataclient.UserDataClient;
 import fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.FranceConnectCertifierService;
 import fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.FranceConnectCertifierService.ValidationResult;
 import fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.MyDashboardIdentityService;
+import fr.paris.lutece.plugins.identitystore.modules.fccertifier.util.DateUtils;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityDto;
 import fr.paris.lutece.portal.service.security.LuteceUser;
 import fr.paris.lutece.portal.service.security.SecurityService;
@@ -142,7 +144,7 @@ public class FranceConnectCertifierApp extends MVCApplication
         UserInfo fcUserInfo = (UserInfo) request.getSession(  ).getAttribute( UserDataClient.ATTRIBUTE_USERINFO );
         IdentityDto identity = MyDashboardIdentityService.getIdentity( user.getName() );
         
-        model.put( MARK_FC_INFOS , fcUserInfo );
+        model.put( MARK_FC_INFOS , new FcIdentity( fcUserInfo ));
         model.put( MARK_IDENTITY , identity );
         
         return getXPage( TEMPLATE_VALIDATE_DATA , LocaleService.getDefault(  ), model );
