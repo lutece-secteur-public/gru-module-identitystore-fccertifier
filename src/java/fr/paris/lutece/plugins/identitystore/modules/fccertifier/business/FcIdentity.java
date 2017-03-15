@@ -135,8 +135,12 @@ public class FcIdentity extends UserInfo
     {
         if( getGender().equals( "male" ))
         {
-            return "Monsieur";
+            return "1";
+        } 
+        else if( getGender().equals( "female" ))
+        {
+            return "2";
         }
-        return "Madame";
+        return "0";
     }
 }
