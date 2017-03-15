@@ -33,7 +33,7 @@
  */
 package fr.paris.lutece.plugins.identitystore.modules.fccertifier.service;
 
-import fr.paris.lutece.plugins.franceconnect.oidc.UserInfo;
+import fr.paris.lutece.plugins.identitystore.modules.fccertifier.business.FcIdentity;
 
 
 /**
@@ -44,29 +44,29 @@ public class ValidationInfos
     // Variables declarations
     private String _strUserEmail;
     private String _strUserConnectionId;
-    private UserInfo _userInfo;
+    private FcIdentity _identity;
     private long _expiresTime;
     private int _nInvalidAttempts;
 
     /**
-     * Returns the FC UserInfo
+     * Returns the FC FcIdentity
      *
-     * @return The FC UserInfo
+     * @return The FC FcIdentity
      */
-    public UserInfo getFCUserInfo(  )
+    public FcIdentity getFCUserInfo(  )
     {
-        return _userInfo;
+        return _identity;
     }
 
     /**
      * Sets the FCUserInfo
      *
      * @param userInfo
-     *          The FC UserInfo
+     *          The FC FcIdentity
      */
-    public void setFCUserInfo( UserInfo userInfo )
+    public void setFCUserInfo( FcIdentity userInfo )
     {
-        _userInfo = userInfo;
+        _identity = userInfo;
     }
 
 

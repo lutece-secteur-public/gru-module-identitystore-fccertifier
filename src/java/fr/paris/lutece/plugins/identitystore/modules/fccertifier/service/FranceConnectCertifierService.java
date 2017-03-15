@@ -46,6 +46,7 @@ import fr.paris.lutece.plugins.identitystore.business.AttributeCertifier;
 import fr.paris.lutece.plugins.identitystore.business.AttributeCertifierHome;
 import fr.paris.lutece.plugins.identitystore.business.Identity;
 import fr.paris.lutece.plugins.identitystore.business.IdentityHome;
+import fr.paris.lutece.plugins.identitystore.modules.fccertifier.business.FcIdentity;
 import fr.paris.lutece.plugins.identitystore.service.ChangeAuthor;
 import fr.paris.lutece.plugins.identitystore.service.IdentityStoreService;
 import fr.paris.lutece.plugins.identitystore.web.service.AuthorType;
@@ -210,7 +211,7 @@ public class FranceConnectCertifierService
 
         _mapValidationCodes.remove( strKey );
         
-        infos.setFCUserInfo( userInfo );
+        infos.setFCUserInfo( new FcIdentity( userInfo ));
         
         certify( infos, request.getLocale(  ) );
 
@@ -248,8 +249,8 @@ public class FranceConnectCertifierService
 
         Identity identity = IdentityHome.findByConnectionId( infos.getUserConnectionId(  ) );
         IdentityStoreService.setAttribute( identity, "family_name", infos.getFCUserInfo().getFamilyName(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "birthplace", infos.getFCUserInfo().getBirthPlace(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "birthdate", infos.getFCUserInfo().getBirthDate(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "birthplace", infos.getFCUserInfo().getIdsBirthPlace(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "birthdate", infos.getFCUserInfo().getIdsBirthDate(), author, certificate );
         IdentityStoreService.setAttribute( identity, "given_name", infos.getFCUserInfo().getGivenName(), author, certificate );
 
         if ( AppPropertiesService.getPropertyBoolean( PROPERTY_API_MANAGER_ENABLED, true ) )
