@@ -251,7 +251,13 @@ public class FranceConnectCertifierService
         IdentityStoreService.setAttribute( identity, "family_name", infos.getFCUserInfo().getFamilyName(), author, certificate );
         IdentityStoreService.setAttribute( identity, "birthplace", infos.getFCUserInfo().getIdsBirthPlace(), author, certificate );
         IdentityStoreService.setAttribute( identity, "birthdate", infos.getFCUserInfo().getIdsBirthDate(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "given_name", infos.getFCUserInfo().getGivenName(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "birthcountry", infos.getFCUserInfo().getIdsBirthCountry(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "fc_gender", infos.getFCUserInfo().getGender(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "fc_family_name", infos.getFCUserInfo().getFamilyName(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "fc_birthplace", infos.getFCUserInfo().getBirthPlace(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "fc_birthdate", infos.getFCUserInfo().getBirthDate(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "fc_given_name", infos.getFCUserInfo().getGivenName(), author, certificate );
+        IdentityStoreService.setAttribute( identity, "fc_birthcountry", infos.getFCUserInfo().getBirthCountry(), author, certificate );
 
         if ( AppPropertiesService.getPropertyBoolean( PROPERTY_API_MANAGER_ENABLED, true ) )
         {

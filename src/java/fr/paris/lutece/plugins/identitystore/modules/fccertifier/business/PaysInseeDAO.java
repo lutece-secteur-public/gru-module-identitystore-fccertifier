@@ -31,36 +31,32 @@
  *
  * License 1.0
  */
-package fr.paris.lutece.plugins.identitystore.modules.fccertifier.util;
 
-import fr.paris.lutece.plugins.identitystore.modules.fccertifier.business.CommunesInseeDAO;
-import fr.paris.lutece.plugins.identitystore.modules.fccertifier.business.PaysInseeDAO;
+
+package fr.paris.lutece.plugins.identitystore.modules.fccertifier.business;
+
+import fr.paris.lutece.util.sql.DAOUtil;
 
 /**
- * InseeUtils
+ * PaysInseeDAO
  */
-public class InseeUtils
+public class PaysInseeDAO 
 {
-    private static final CommunesInseeDAO _daoCommunes = new CommunesInseeDAO();
-    private static final PaysInseeDAO _daoPays = new PaysInseeDAO();
-    
-    /**
-     * Give the name of the place for a given INSEE code
-     * @param strCode The INSEE code
-     * @return The name
-     */
-    public static String getPlaceName( String strCode )
-    {
-        return _daoCommunes.findByCode( strCode );
-    }
+    private static final String SQL_QUERY_SELECT = "SELECT nom_pays FROM fccertifier_insee_pays WHERE code_pays = ?";
 
-    /**
-     * Give the name of the country for a given INSEE code
-     * @param strCode The INSEE code
-     * @return The name
-     */
-    public static String getCountryName( String strCode )
+    public String findByCode( String strCodePays )
     {
-        return _daoPays.findByCode( strCode );
+        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT );
+        daoUtil.setString( 1, strCodePays );
+        daoUtil.executeQuery();
+
+        String strNomPays = null;
+
+        if( daoUtil.next() )
+        {
+            strNomPays = daoUtil.getString( 1 );
+        }
+        daoUtil.free();
+        return strNomPays;
     }
 }
