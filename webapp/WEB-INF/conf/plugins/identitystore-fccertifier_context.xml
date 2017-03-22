@@ -12,22 +12,8 @@
        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
        
     
-    <!-- France Connect -->
-    <bean id="identitystore-fccertifier.dataClientUser" class="fr.paris.lutece.plugins.identitystore.modules.fccertifier.dataclient.UserDataClient">
-        <property name="name" value="user" />
-        <property name="dataServerUri" value="https://fcp.integ01.dev-franceconnect.fr/api/v1/userinfo"/>
-        <property name="tokenMethod" value="HEADER"/>
-        <property name="scope">
-            <set value-type="java.lang.String">
-                <value>openid</value>
-                <value>profile</value>
-                <value>email</value>
-                <value>address</value>
-                <value>phone</value>
-            </set>
-        </property>
-    </bean>
     
+
     <!-- library notifyGru -->
     <bean id="identitystore-fccertifier.lib-notifygru.apiManagerTransport" class="fr.paris.lutece.plugins.librarynotifygru.rs.service.NotificationTransportApiManagerRest">
         <property name="notificationEndPoint">
@@ -46,5 +32,25 @@
         <constructor-arg ref="identitystore-fccertifier.lib-notifygru.apiManagerTransport"/>
     </bean> 
     
+    <!-- Certifier -->
+    <bean id="identitystore-fccertifier.certifier" class="fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.FranceConnectCertifierService" >
+        <property name="fieldsList">
+            <list>
+                <value>family_name</value>
+                <value>birthplace</value>
+                <value>birthdate</value>
+                <value>birthcountry</value>
+                <value>fc_gender</value>
+                <value>fc_family_name</value>
+                <value>fc_birthplace</value>
+                <value>fc_birthdate</value>
+                <value>fc_given_name</value>
+                <value>fc_birthcountry</value>
+            </list>
+        </property>
+        <property name="notificationService">
+            <ref bean="identitystore-fccertifier.lib-notifygru.notificationService" />
+        </property>
+    </bean>
 
 </beans>

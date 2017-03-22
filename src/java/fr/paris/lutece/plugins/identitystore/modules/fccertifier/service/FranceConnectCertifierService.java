@@ -33,7 +33,6 @@
  */
 package fr.paris.lutece.plugins.identitystore.modules.fccertifier.service;
 
-import fr.paris.lutece.plugins.franceconnect.oidc.UserInfo;
 import fr.paris.lutece.plugins.grubusiness.business.customer.Customer;
 import fr.paris.lutece.plugins.grubusiness.business.demand.Demand;
 import fr.paris.lutece.plugins.grubusiness.business.notification.BackofficeNotification;
@@ -46,48 +45,36 @@ import fr.paris.lutece.plugins.identitystore.business.AttributeCertifier;
 import fr.paris.lutece.plugins.identitystore.business.AttributeCertifierHome;
 import fr.paris.lutece.plugins.identitystore.business.Identity;
 import fr.paris.lutece.plugins.identitystore.business.IdentityHome;
-import fr.paris.lutece.plugins.identitystore.modules.fccertifier.business.FcIdentity;
 import fr.paris.lutece.plugins.identitystore.service.ChangeAuthor;
 import fr.paris.lutece.plugins.identitystore.service.IdentityStoreService;
+import fr.paris.lutece.plugins.identitystore.service.certifier.CertifierService;
+import fr.paris.lutece.plugins.identitystore.web.rs.dto.AttributeDto;
+import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityDto;
 import fr.paris.lutece.plugins.identitystore.web.service.AuthorType;
 import fr.paris.lutece.plugins.librarynotifygru.services.NotificationService;
 import fr.paris.lutece.portal.service.i18n.I18nService;
-import fr.paris.lutece.portal.service.security.LuteceUser;
-import fr.paris.lutece.portal.service.security.SecurityService;
-import fr.paris.lutece.portal.service.security.UserNotSignedException;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
+import fr.paris.lutece.portal.web.l10n.LocaleService;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 
 /**
  * FranceConnect Certifier Service
  */
-public class FranceConnectCertifierService
+public class FranceConnectCertifierService implements CertifierService
 {
-    private static final String MESSAGE_CODE_VALIDATION_OK = "module.identitystore.fccertifier.message.validation.ok";
-    private static final String MESSAGE_CODE_VALIDATION_INVALID = "module.identitystore.fccertifier.message.validation.invalidCode";
-    private static final String MESSAGE_SESSION_EXPIRED = "module.identitystore.fccertifier.message.validation.sessionExpired";
-    private static final String MESSAGE_CODE_EXPIRED = "module.identitystore.fccertifier.message.validation.codeExpired";
-    private static final String MESSAGE_TOO_MANY_ATTEMPS = "module.identitystore.fccertifier.message.validation.tooManyAttempts";
-     private static final String MESSAGE_SMS_VALIDATION_CONFIRM_TEXT = "module.identitystore.fccertifier.message.validation.smsValidationConfirmText";
-    private static final String PROPERTY_CODE_LENGTH = "identitystore.fccertifier.codeLength";
-    private static final String PROPERTY_EXPIRES_DELAY = "identitystore.fccertifier.expiresDelay";
-    private static final String PROPERTY_MAX_ATTEMPTS = "identitystore.fccertifier.maxAttempts";
-    private static final String PROPERTY_MOCKED_EMAIL = "identitystore.fccertifier.mockedEmail";
-    private static final String PROPERTY_MOCKED_CONNECTION_ID = "identitystore.fccertifier.mockedConnectionId";
+    private static final String MESSAGE_SMS_VALIDATION_CONFIRM_TEXT = "module.identitystore.fccertifier.message.validation.smsValidationConfirmText";
     private static final String PROPERTY_API_MANAGER_ENABLED = "identitystore.fccertifier.apiManager.enabled";
     private static final String PROPERTY_CERTIFIER_CODE = "identitystore.fccertifier.certifierCode";
     private static final String PROPERTY_CERTIFIER_CLOSE_CRM_STATUS_ID = "identitystore.fccertifier.crmCloseStatusId";
@@ -107,27 +94,13 @@ public class FranceConnectCertifierService
     private static final String MESSAGE_GRU_NOTIF_AGENT_MESSAGE = "module.identitystore.fccertifier.gru.notif.agent.message";
     private static final String MESSAGE_GRU_NOTIF_AGENT_STATUS_TEXT = "module.identitystore.fccertifier.gru.notif.agent.statusText";
     private static final String DEFAULT_CERTIFIER_CODE = "fccertifier";
-    private static final String DEFAULT_CONNECTION_ID = "1";
-    private static final String DEFAULT_EMAIL = "test@test.fr";
     private static final int DEFAULT_CERTIFIER_CRM_CLOSE_STATUS_ID = 1;
     private static final int DEFAULT_CERTIFIER_DEMAND_CLOSE_STATUS_ID = 1;
     private static final String DEFAULT_CERTIFIER_DEMAND_TYPE_ID = "401";
-    private static final int DEFAULT_LENGTH = 6;
-    private static final int DEFAULT_EXPIRES_DELAY = 5;
-    private static final int DEFAULT_MAX_ATTEMPTS = 3;
     private static final int NO_CERTIFICATE_EXPIRATION_DELAY = -1;
     private static final int DEFAULT_CERTIFICATE_LEVEL = 1;
     private static final String CERTIFIER_CODE = AppPropertiesService.getProperty( PROPERTY_CERTIFIER_CODE,
             DEFAULT_CERTIFIER_CODE );
-    private static final String MOCKED_USER_CONNECTION_ID = AppPropertiesService.getProperty( PROPERTY_MOCKED_CONNECTION_ID,
-            DEFAULT_CONNECTION_ID );
-    private static final String MOCKED_USER_EMAIL = AppPropertiesService.getProperty( PROPERTY_MOCKED_EMAIL,
-            DEFAULT_EMAIL );
-    private static final int EXPIRES_DELAY = AppPropertiesService.getPropertyInt( PROPERTY_EXPIRES_DELAY,
-            DEFAULT_EXPIRES_DELAY );
-    private static final int CODE_LENGTH = AppPropertiesService.getPropertyInt( PROPERTY_CODE_LENGTH, DEFAULT_LENGTH );
-    private static final int MAX_ATTEMPTS = AppPropertiesService.getPropertyInt( PROPERTY_MAX_ATTEMPTS,
-            DEFAULT_MAX_ATTEMPTS );
     private static final int CERTIFICATE_EXPIRATION_DELAY = AppPropertiesService.getPropertyInt( PROPERTY_CERTIFICATE_EXPIRATION_DELAY,
             NO_CERTIFICATE_EXPIRATION_DELAY );
     private static final int CERTIFICATE_LEVEL = AppPropertiesService.getPropertyInt( PROPERTY_CERTIFICATE_LEVEL,
@@ -135,11 +108,10 @@ public class FranceConnectCertifierService
     private static final String SERVICE_NAME = "France Connect Certifier Service";
     private static final String DEMAND_PREFIX = "MOBCERT_";
     private static final String BEAN_NOTIFICATION_SENDER = "identitystore-fccertifier.lib-notifygru.notificationService";
-    
-    
-    private static Map<String, ValidationInfos> _mapValidationCodes = new HashMap<String, ValidationInfos>(  );
-    
+    private static final String CERTIFIER_NAME = "fccertifier";
+       
     private NotificationService _notifyGruSenderService;
+    private static List<String> _listFields;
 
     /**
      * constructor
@@ -147,86 +119,37 @@ public class FranceConnectCertifierService
     public FranceConnectCertifierService(  )
     {
         super(  );
-        _notifyGruSenderService = SpringContextService.getBean( BEAN_NOTIFICATION_SENDER );
-    }
-
-    /**
-     * Starts the validation process by generating and sending a validation code
-     *
-     * @param request
-     *          The HTTP request
-     * @throws fr.paris.lutece.portal.service.security.UserNotSignedException
-     *           if no user found
-     */
-    public void startValidation( HttpServletRequest request )
-        throws UserNotSignedException
-    {
-
-        HttpSession session = request.getSession( true );
-        ValidationInfos infos = new ValidationInfos(  );
-        infos.setExpiresTime( getExpiresTime(  ) );
-        infos.setUserConnectionId( getUserConnectionId( request ) );
-        infos.setUserEmail( getUserEmail( request ) );
-
-        _mapValidationCodes.put( session.getId(  ), infos );
-    }
-
-    /**
-     * Validate a validation code
-     *
-     * @param request
-     *          The request
-     * @param userInfo
-     *          UserInfo from FranceConnect
-     * @return A validation result
-     */
-    public ValidationResult validate( HttpServletRequest request, UserInfo userInfo )
-    {
-        HttpSession session = request.getSession(  );
-
-        if ( session == null )
-        {
-            return ValidationResult.SESSION_EXPIRED;
-        }
-
-        String strKey = session.getId(  );
-        ValidationInfos infos = _mapValidationCodes.get( strKey );
-
-        if ( infos == null )
-        {
-            return ValidationResult.SESSION_EXPIRED;
-        }
-
-        if ( infos.getInvalidAttempts(  ) > MAX_ATTEMPTS )
-        {
-            return ValidationResult.TOO_MANY_ATTEMPS;
-        }
-
-        if ( infos.getExpiresTime(  ) < now(  ) )
-        {
-            _mapValidationCodes.remove( strKey );
-
-            return ValidationResult.CODE_EXPIRED;
-        }
-
-        _mapValidationCodes.remove( strKey );
         
-        infos.setFCUserInfo( new FcIdentity( userInfo ));
-        
-        certify( infos, request.getLocale(  ) );
-
-        return ValidationResult.OK;
+    }
+    
+    /**
+     * Setter for Spring Context
+     * @param service The notification 
+     */
+    public void setNotificationService( NotificationService service )
+    {
+         _notifyGruSenderService = service;
+    }
+    
+    /**
+     * Setter for Spring Context
+     * @param list The list
+     */
+    public void setFieldsList( List list )
+    {
+        _listFields = list;
     }
 
     /**
      * Certify the attribute change
      *
-     * @param infos
-     *          The validation infos
-     * @param locale
-     *          the locale
+     * @param identityDto
+     *          The identity data
+     * @param strClientCode
+     *          the client code
      */
-    private void certify( ValidationInfos infos, Locale locale )
+    @Override
+    public void certify( IdentityDto identityDto, String strClientCode )
     {
         AttributeCertifier certifier = AttributeCertifierHome.findByCode( CERTIFIER_CODE );
         AttributeCertificate certificate = new AttributeCertificate(  );
@@ -247,42 +170,40 @@ public class FranceConnectCertifierService
         author.setApplication( SERVICE_NAME );
         author.setType( AuthorType.TYPE_USER_OWNER.getTypeValue(  ) );
 
-        Identity identity = IdentityHome.findByConnectionId( infos.getUserConnectionId(  ) );
-        IdentityStoreService.setAttribute( identity, "family_name", infos.getFCUserInfo().getFamilyName(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "birthplace", infos.getFCUserInfo().getIdsBirthPlace(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "birthdate", infos.getFCUserInfo().getIdsBirthDate(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "birthcountry", infos.getFCUserInfo().getIdsBirthCountry(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "fc_gender", infos.getFCUserInfo().getGender(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "fc_family_name", infos.getFCUserInfo().getFamilyName(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "fc_birthplace", infos.getFCUserInfo().getBirthPlace(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "fc_birthdate", infos.getFCUserInfo().getBirthDate(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "fc_given_name", infos.getFCUserInfo().getGivenName(), author, certificate );
-        IdentityStoreService.setAttribute( identity, "fc_birthcountry", infos.getFCUserInfo().getBirthCountry(), author, certificate );
+        Identity identity = IdentityHome.findByConnectionId( identityDto.getConnectionId(  ) );
+        for( String strField : _listFields )
+        {
+            AttributeDto attribute = identityDto.getAttributes().get( strField );
+            if( (attribute != null) && (attribute.getValue() != null))
+            {
+                IdentityStoreService.setAttribute( identity, strField, attribute.getValue() , author, certificate );
+            }
+        }
 
         if ( AppPropertiesService.getPropertyBoolean( PROPERTY_API_MANAGER_ENABLED, true ) )
         {
-            Notification certifNotif = buildCertifiedNotif( infos, locale );
+            Notification certifNotif = buildCertifiedNotif( identityDto, LocaleService.getDefault() );
 
             _notifyGruSenderService.send( certifNotif );
         }
         else
         {
             // mock mode => certification message is logged
-            AppLogService.info( I18nService.getLocalizedString( MESSAGE_SMS_VALIDATION_CONFIRM_TEXT, locale ) );
+            AppLogService.info( I18nService.getLocalizedString( MESSAGE_SMS_VALIDATION_CONFIRM_TEXT, LocaleService.getDefault() ) );
         }
     }
 
     /**
      * build a notification from validation infos
      *
-     * @param infos
-     *          validations infos
+     * @param identityDto
+     *          identity data
      * @param locale
      *          locale
      * @return Notification notification to send (SMS, agent,
      *         dashboard, email)
      */
-    private static Notification buildCertifiedNotif( ValidationInfos infos, Locale locale )
+    private static Notification buildCertifiedNotif( IdentityDto identityDto, Locale locale )
     {
         Notification certifNotif = new Notification(  );
         certifNotif.setDate( new Date(  ).getTime(  ) );
@@ -296,8 +217,9 @@ public class FranceConnectCertifierService
                 DEFAULT_CERTIFIER_DEMAND_TYPE_ID ) );
 
         Customer customer = new Customer(  );
-        customer.setConnectionId( infos.getUserConnectionId(  ) );
-        customer.setEmail( infos.getUserEmail(  ) );
+        customer.setConnectionId( identityDto.getConnectionId(  ) );
+        String strEmail = identityDto.getAttributes().get( "email" ).getValue();
+        customer.setEmail( strEmail );
         demand.setCustomer( customer );
 
         certifNotif.setDemand( demand );
@@ -322,7 +244,7 @@ public class FranceConnectCertifierService
         broadcastEmail.setSenderEmail( AppPropertiesService.getProperty( PROPERTY_GRU_NOTIF_EMAIL_SENDER_MAIL ) );
         broadcastEmail.setSenderName( AppPropertiesService.getProperty( PROPERTY_GRU_NOTIF_EMAIL_SENDER_NAME ) );
 
-        broadcastEmail.setRecipient( EmailAddress.buildEmailAddresses( new String[] { infos.getUserEmail(  ) } ) );
+        broadcastEmail.setRecipient( EmailAddress.buildEmailAddresses( new String[] { strEmail } ) );
 
         certifNotif.addBroadcastEmail( broadcastEmail );
 
@@ -349,120 +271,12 @@ public class FranceConnectCertifierService
     }
 
     /**
-     * returns the user connection ID
-     *
-     * @param request
-     *          The HTTP request
-     * @return the user connection ID
-     * @throws UserNotSignedException
-     *           If no user is connected
+     * {@inheritDoc }
      */
-    private static String getUserConnectionId( HttpServletRequest request )
-        throws UserNotSignedException
+    @Override
+    public String getName()
     {
-        if ( SecurityService.isAuthenticationEnable(  ) )
-        {
-            LuteceUser user = SecurityService.getInstance(  ).getRegisteredUser( request );
-
-            if ( user != null )
-            {
-                return user.getName(  );
-            }
-            else
-            {
-                throw new UserNotSignedException(  );
-            }
-        }
-        else
-        {
-            return MOCKED_USER_CONNECTION_ID;
-        }
+        return CERTIFIER_NAME;
     }
 
-    /**
-     * returns the user email
-     *
-     * @param request
-     *          The HTTP request
-     * @return the user connection ID
-     * @throws UserNotSignedException
-     *           If no user is connected
-     */
-    private static String getUserEmail( HttpServletRequest request )
-        throws UserNotSignedException
-    {
-        if ( SecurityService.isAuthenticationEnable(  ) )
-        {
-            LuteceUser user = SecurityService.getInstance(  ).getRegisteredUser( request );
-
-            if ( user != null )
-            {
-                return user.getEmail(  );
-            }
-            else
-            {
-                throw new UserNotSignedException(  );
-            }
-        }
-        else
-        {
-            return MOCKED_USER_EMAIL;
-        }
-    }
-
-    /**
-     * Calculate an expiration time
-     *
-     * @return the time as a long value
-     */
-    private static long getExpiresTime(  )
-    {
-        return now(  ) + ( (long) EXPIRES_DELAY * 60000L );
-    }
-
-    /**
-     * The current time as a long value
-     *
-     * @return current time as a long value
-     */
-    private static long now(  )
-    {
-        return ( new Date(  ) ).getTime(  );
-    }
-
-    /**
-     * Enumeration of all validation results
-     */
-    public enum ValidationResult
-    {
-        OK( MESSAGE_CODE_VALIDATION_OK ),
-        INVALID_CODE( MESSAGE_CODE_VALIDATION_INVALID ),
-        SESSION_EXPIRED( MESSAGE_SESSION_EXPIRED ),
-        CODE_EXPIRED( MESSAGE_CODE_EXPIRED ),
-        TOO_MANY_ATTEMPS( MESSAGE_TOO_MANY_ATTEMPS );	    	
-    	
-    	private String _strMessageKey;
-
-        /**
-         * Constructor
-         *
-         * @param strMessageKey
-         *          The i18n message key
-         */
-        ValidationResult( String strMessageKey )
-        {
-            _strMessageKey = strMessageKey;
-        }
-
-        /**
-         * Return the i18n message key
-         *
-         * @return the i18n message key
-         */
-        public String getMessageKey(  )
-        {
-            return _strMessageKey;
-        }
-
-    }
 }

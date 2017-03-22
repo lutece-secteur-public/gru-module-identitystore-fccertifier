@@ -15,19 +15,4 @@
     <!-- if the plugin must have a connection pool with parameter : 1 - yes, 0 - no -->
     <db-pool-required>0</db-pool-required>
     
-	<!-- Specific plugin Javascript files -->
-    <javascript-files>
-    </javascript-files>
-    
-    <!-- Specific plugin CSS stylesheet -->
-    <css-stylesheets>
-    </css-stylesheets>
-    
-    <!-- XPages parameters -->
-    <applications>
-         <application>
-            <application-id>fccertifier</application-id>
-            <application-class>fr.paris.lutece.plugins.identitystore.modules.fccertifier.web.FranceConnectCertifierApp</application-class>
-        </application>
-    </applications>
 </plug-in>
