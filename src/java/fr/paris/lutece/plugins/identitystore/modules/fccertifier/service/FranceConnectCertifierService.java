@@ -67,8 +67,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-
-
 /**
  * FranceConnect Certifier Service
  */
@@ -99,41 +97,43 @@ public class FranceConnectCertifierService implements CertifierService
     private static final String DEFAULT_CERTIFIER_DEMAND_TYPE_ID = "401";
     private static final int NO_CERTIFICATE_EXPIRATION_DELAY = -1;
     private static final int DEFAULT_CERTIFICATE_LEVEL = 1;
-    private static final String CERTIFIER_CODE = AppPropertiesService.getProperty( PROPERTY_CERTIFIER_CODE,
-            DEFAULT_CERTIFIER_CODE );
+    private static final String CERTIFIER_CODE = AppPropertiesService.getProperty( PROPERTY_CERTIFIER_CODE, DEFAULT_CERTIFIER_CODE );
     private static final int CERTIFICATE_EXPIRATION_DELAY = AppPropertiesService.getPropertyInt( PROPERTY_CERTIFICATE_EXPIRATION_DELAY,
             NO_CERTIFICATE_EXPIRATION_DELAY );
-    private static final int CERTIFICATE_LEVEL = AppPropertiesService.getPropertyInt( PROPERTY_CERTIFICATE_LEVEL,
-            DEFAULT_CERTIFICATE_LEVEL );
+    private static final int CERTIFICATE_LEVEL = AppPropertiesService.getPropertyInt( PROPERTY_CERTIFICATE_LEVEL, DEFAULT_CERTIFICATE_LEVEL );
     private static final String SERVICE_NAME = "France Connect Certifier Service";
     private static final String DEMAND_PREFIX = "MOBCERT_";
     private static final String BEAN_NOTIFICATION_SENDER = "identitystore-fccertifier.lib-notifygru.notificationService";
     private static final String CERTIFIER_NAME = "fccertifier";
-       
+
     private NotificationService _notifyGruSenderService;
     private static List<String> _listFields;
 
     /**
      * constructor
      */
-    public FranceConnectCertifierService(  )
+    public FranceConnectCertifierService( )
     {
-        super(  );
-        
+        super( );
+
     }
-    
+
     /**
      * Setter for Spring Context
-     * @param service The notification 
+     * 
+     * @param service
+     *            The notification
      */
     public void setNotificationService( NotificationService service )
     {
-         _notifyGruSenderService = service;
+        _notifyGruSenderService = service;
     }
-    
+
     /**
      * Setter for Spring Context
-     * @param list The list
+     * 
+     * @param list
+     *            The list
      */
     public void setFieldsList( List list )
     {
@@ -144,52 +144,52 @@ public class FranceConnectCertifierService implements CertifierService
      * Certify the attribute change
      *
      * @param identityDto
-     *          The identity data
+     *            The identity data
      * @param strClientCode
-     *          the client code
+     *            the client code
      */
     @Override
     public void certify( IdentityDto identityDto, String strClientCode )
     {
         AttributeCertifier certifier = AttributeCertifierHome.findByCode( CERTIFIER_CODE );
-        AttributeCertificate certificate = new AttributeCertificate(  );
-        certificate.setCertificateDate( new Timestamp( new Date(  ).getTime(  ) ) );
+        AttributeCertificate certificate = new AttributeCertificate( );
+        certificate.setCertificateDate( new Timestamp( new Date( ).getTime( ) ) );
         certificate.setCertificateLevel( CERTIFICATE_LEVEL );
-        certificate.setIdCertifier( certifier.getId(  ) );
-        certificate.setCertifier( certifier.getName(  ) );
+        certificate.setIdCertifier( certifier.getId( ) );
+        certificate.setCertifier( certifier.getName( ) );
 
         if ( CERTIFICATE_EXPIRATION_DELAY != NO_CERTIFICATE_EXPIRATION_DELAY )
         {
-            Calendar c = Calendar.getInstance(  );
-            c.setTime( new Date(  ) );
+            Calendar c = Calendar.getInstance( );
+            c.setTime( new Date( ) );
             c.add( Calendar.DATE, CERTIFICATE_EXPIRATION_DELAY );
-            certificate.setExpirationDate( new Timestamp( c.getTime(  ).getTime(  ) ) );
+            certificate.setExpirationDate( new Timestamp( c.getTime( ).getTime( ) ) );
         }
 
-        ChangeAuthor author = new ChangeAuthor(  );
+        ChangeAuthor author = new ChangeAuthor( );
         author.setApplication( SERVICE_NAME );
-        author.setType( AuthorType.TYPE_USER_OWNER.getTypeValue(  ) );
+        author.setType( AuthorType.TYPE_USER_OWNER.getTypeValue( ) );
 
-        Identity identity = IdentityHome.findByConnectionId( identityDto.getConnectionId(  ) );
-        for( String strField : _listFields )
+        Identity identity = IdentityHome.findByConnectionId( identityDto.getConnectionId( ) );
+        for ( String strField : _listFields )
         {
-            AttributeDto attribute = identityDto.getAttributes().get( strField );
-            if( (attribute != null) && (attribute.getValue() != null))
+            AttributeDto attribute = identityDto.getAttributes( ).get( strField );
+            if ( ( attribute != null ) && ( attribute.getValue( ) != null ) )
             {
-                IdentityStoreService.setAttribute( identity, strField, attribute.getValue() , author, certificate );
+                IdentityStoreService.setAttribute( identity, strField, attribute.getValue( ), author, certificate );
             }
         }
 
         if ( AppPropertiesService.getPropertyBoolean( PROPERTY_API_MANAGER_ENABLED, true ) )
         {
-            Notification certifNotif = buildCertifiedNotif( identityDto, LocaleService.getDefault() );
+            Notification certifNotif = buildCertifiedNotif( identityDto, LocaleService.getDefault( ) );
 
             _notifyGruSenderService.send( certifNotif );
         }
         else
         {
             // mock mode => certification message is logged
-            AppLogService.info( I18nService.getLocalizedString( MESSAGE_SMS_VALIDATION_CONFIRM_TEXT, LocaleService.getDefault() ) );
+            AppLogService.info( I18nService.getLocalizedString( MESSAGE_SMS_VALIDATION_CONFIRM_TEXT, LocaleService.getDefault( ) ) );
         }
     }
 
@@ -197,38 +197,34 @@ public class FranceConnectCertifierService implements CertifierService
      * build a notification from validation infos
      *
      * @param identityDto
-     *          identity data
+     *            identity data
      * @param locale
-     *          locale
-     * @return Notification notification to send (SMS, agent,
-     *         dashboard, email)
+     *            locale
+     * @return Notification notification to send (SMS, agent, dashboard, email)
      */
     private static Notification buildCertifiedNotif( IdentityDto identityDto, Locale locale )
     {
-        Notification certifNotif = new Notification(  );
-        certifNotif.setDate( new Date(  ).getTime(  ) );
+        Notification certifNotif = new Notification( );
+        certifNotif.setDate( new Date( ).getTime( ) );
 
-        Demand demand = new Demand(  );
-        demand.setId( generateDemandId(  ) );
-        demand.setReference( DEMAND_PREFIX + demand.getId(  ) );
-        demand.setStatusId( AppPropertiesService.getPropertyInt( PROPERTY_CERTIFIER_CLOSE_DEMAND_STATUS_ID,
-                DEFAULT_CERTIFIER_DEMAND_CLOSE_STATUS_ID ) );
-        demand.setTypeId( AppPropertiesService.getProperty( PROPERTY_CERTIFIER_DEMAND_TYPE_ID,
-                DEFAULT_CERTIFIER_DEMAND_TYPE_ID ) );
+        Demand demand = new Demand( );
+        demand.setId( generateDemandId( ) );
+        demand.setReference( DEMAND_PREFIX + demand.getId( ) );
+        demand.setStatusId( AppPropertiesService.getPropertyInt( PROPERTY_CERTIFIER_CLOSE_DEMAND_STATUS_ID, DEFAULT_CERTIFIER_DEMAND_CLOSE_STATUS_ID ) );
+        demand.setTypeId( AppPropertiesService.getProperty( PROPERTY_CERTIFIER_DEMAND_TYPE_ID, DEFAULT_CERTIFIER_DEMAND_TYPE_ID ) );
 
-        Customer customer = new Customer(  );
-        customer.setConnectionId( identityDto.getConnectionId(  ) );
-        String strEmail = identityDto.getAttributes().get( "email" ).getValue();
+        Customer customer = new Customer( );
+        customer.setConnectionId( identityDto.getConnectionId( ) );
+        String strEmail = identityDto.getAttributes( ).get( "email" ).getValue( );
         customer.setEmail( strEmail );
         demand.setCustomer( customer );
 
         certifNotif.setDemand( demand );
 
+        MyDashboardNotification notifDashboard = new MyDashboardNotification( );
+        notifDashboard.setStatusId( AppPropertiesService.getPropertyInt(
 
-        MyDashboardNotification notifDashboard = new MyDashboardNotification(  );
-        notifDashboard.setStatusId( AppPropertiesService.getPropertyInt( 
-
-                PROPERTY_CERTIFIER_CLOSE_CRM_STATUS_ID, DEFAULT_CERTIFIER_CRM_CLOSE_STATUS_ID )  );
+        PROPERTY_CERTIFIER_CLOSE_CRM_STATUS_ID, DEFAULT_CERTIFIER_CRM_CLOSE_STATUS_ID ) );
 
         notifDashboard.setSubject( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_DASHBOARD_SUBJECT, locale ) );
         notifDashboard.setMessage( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_DASHBOARD_MESSAGE, locale ) );
@@ -237,19 +233,20 @@ public class FranceConnectCertifierService implements CertifierService
         notifDashboard.setData( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_DASHBOARD_DATA, locale ) );
         certifNotif.setMyDashboardNotification( notifDashboard );
 
-
-        BroadcastNotification broadcastEmail = new BroadcastNotification(  );
+        BroadcastNotification broadcastEmail = new BroadcastNotification( );
         broadcastEmail.setMessage( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_EMAIL_MESSAGE, locale ) );
         broadcastEmail.setSubject( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_EMAIL_SUBJECT, locale ) );
         broadcastEmail.setSenderEmail( AppPropertiesService.getProperty( PROPERTY_GRU_NOTIF_EMAIL_SENDER_MAIL ) );
         broadcastEmail.setSenderName( AppPropertiesService.getProperty( PROPERTY_GRU_NOTIF_EMAIL_SENDER_NAME ) );
 
-        broadcastEmail.setRecipient( EmailAddress.buildEmailAddresses( new String[] { strEmail } ) );
+        broadcastEmail.setRecipient( EmailAddress.buildEmailAddresses( new String [ ] {
+            strEmail
+        } ) );
 
         certifNotif.addBroadcastEmail( broadcastEmail );
 
-        BackofficeNotification notifAgent = new BackofficeNotification(  );
-        notifAgent.setMessage( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_AGENT_MESSAGE,locale ) );
+        BackofficeNotification notifAgent = new BackofficeNotification( );
+        notifAgent.setMessage( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_AGENT_MESSAGE, locale ) );
         notifAgent.setStatusText( I18nService.getLocalizedString( MESSAGE_GRU_NOTIF_AGENT_STATUS_TEXT, locale ) );
         certifNotif.setBackofficeNotification( notifAgent );
 
@@ -261,11 +258,11 @@ public class FranceConnectCertifierService implements CertifierService
      *
      * @return demand id
      */
-    private static String generateDemandId(  )
+    private static String generateDemandId( )
     {
         // FIXME =>how to generate a unique id
-        Random rand = new Random(  );
-        int randomNum = rand.nextInt(  );
+        Random rand = new Random( );
+        int randomNum = rand.nextInt( );
 
         return String.valueOf( Math.abs( randomNum ) );
     }
@@ -274,7 +271,7 @@ public class FranceConnectCertifierService implements CertifierService
      * {@inheritDoc }
      */
     @Override
-    public String getName()
+    public String getName( )
     {
         return CERTIFIER_NAME;
     }
