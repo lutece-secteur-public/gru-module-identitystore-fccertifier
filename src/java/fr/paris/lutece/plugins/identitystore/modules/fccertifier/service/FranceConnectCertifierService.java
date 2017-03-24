@@ -47,7 +47,6 @@ import fr.paris.lutece.plugins.identitystore.business.Identity;
 import fr.paris.lutece.plugins.identitystore.business.IdentityHome;
 import fr.paris.lutece.plugins.identitystore.service.ChangeAuthor;
 import fr.paris.lutece.plugins.identitystore.service.IdentityStoreService;
-import fr.paris.lutece.plugins.identitystore.service.certifier.CertifierService;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.AttributeDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityDto;
 import fr.paris.lutece.plugins.identitystore.web.service.AuthorType;
@@ -66,11 +65,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import fr.paris.lutece.plugins.identitystore.service.certifier.Certifier;
 
 /**
  * FranceConnect Certifier Service
  */
-public class FranceConnectCertifierService implements CertifierService
+public class FranceConnectCertifierService implements Certifier
 {
     private static final String MESSAGE_SMS_VALIDATION_CONFIRM_TEXT = "module.identitystore.fccertifier.message.validation.smsValidationConfirmText";
     private static final String PROPERTY_API_MANAGER_ENABLED = "identitystore.fccertifier.apiManager.enabled";
