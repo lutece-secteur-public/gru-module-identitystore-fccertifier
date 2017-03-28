@@ -4,27 +4,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd" >
     
-
-    <!-- library notifyGru -->
-    <bean id="identitystore-fccertifier.lib-notifygru.apiManagerTransport" class="fr.paris.lutece.plugins.librarynotifygru.rs.service.NotificationTransportApiManagerRest">
-        <property name="notificationEndPoint">
-            <value>http://127.0.0.1:9092/lutece/rest/notification/send</value>
-        </property>
-        <property name="apiManagerEndPoint">
-            <value>http://127.0.0.1:9092/lutece/rest/api/token</value>
-        </property>
-    </bean>
-    <bean id="identitystore-fccertifier.lib-notifygru.restTransport" class="fr.paris.lutece.plugins.librarynotifygru.rs.service.NotificationTransportRest">
-        <property name="notificationEndPoint">
-            <value>http://localhost:8080/lutece/rest/notification/send</value>
-        </property>
-    </bean> 
-    <bean id="identitystore-fccertifier.lib-notifygru.notificationService" class="fr.paris.lutece.plugins.librarynotifygru.services.NotificationService">
-        <constructor-arg ref="identitystore-fccertifier.lib-notifygru.apiManagerTransport"/>
-    </bean> 
-    
     <!-- Certifier -->
-    <bean id="identitystore-fccertifier.certifier" class="fr.paris.lutece.plugins.identitystore.service.certifier.BaseCertifier" >
+    <bean id="identitystore-fccertifier.certifier" class="fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.certifier.FranceConnectCertifier" >
         <property name="code" value="fccertifier" />
         <property name="name" value="France Connect Certifier" />
         <property name="description" value="Certificateur d'attributs d'état civil à partir de FranceConnect" />
@@ -45,6 +26,13 @@
                 <value>fc_birthcountry</value>
             </list>
         </property>
+        <property name="idDemandType" value="401" />
+        <property name="idCloseCrmStatus" value="1" />
+        <property name="idCloseDemandStatus" value="1" />
+        <property name="demandPrefix" value="FCC" />
+        <property name="notificationService">
+            <ref bean="identitystore-grucertifier.lib-notifygru.notificationService"/>
+        </property>
     </bean>
-
+    
 </beans>

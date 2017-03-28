@@ -29,7 +29,7 @@ Ce plugin peut notifier la GRU des mises à jour réalisées.
 
 ##Configuration
 
-Ce service de certification est détecté automatiquement par IdentityStore grâce à la découverte du composant CertifierService déclaré dansle fichier contexte.
+Ce service de certification est détecté automatiquement par IdentityStore grâce à la découverte du composant GruCertifier déclaré dansle fichier contexte.
 
 Sont à configurer dans le fichier contexte :
  
