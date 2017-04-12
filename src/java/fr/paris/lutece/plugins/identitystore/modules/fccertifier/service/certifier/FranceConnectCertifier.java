@@ -35,6 +35,7 @@ package fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.certif
 
 import fr.paris.lutece.plugins.identitystore.modules.grucertifier.service.GruCertifier;
 import fr.paris.lutece.portal.service.i18n.I18nService;
+
 import java.util.Locale;
 
 /**
@@ -42,8 +43,9 @@ import java.util.Locale;
  */
 public class FranceConnectCertifier extends GruCertifier
 {
-    private static final String MESSAGE_GRU_NOTIF_EMAIL_SENDER_NAME = "module.identitystore.fccertifier.senderName";
-    private static final String MESSAGE_GRU_NOTIF_EMAIL_SENDER_MAIL = "module.identitystore.fccertifier.senderMail";
+
+	private static final String MESSAGE_GRU_NOTIF_EMAIL_SENDER_NAME = "module.identitystore.fccertifier.gru.notif.senderName";
+    private static final String MESSAGE_GRU_NOTIF_EMAIL_SENDER_MAIL = "module.identitystore.fccertifier.gru.notif.senderMail";
     private static final String MESSAGE_GRU_NOTIF_DASHBOARD_STATUS_TEXT = "module.identitystore.fccertifier.gru.notif.dashboard.statusText";
     private static final String MESSAGE_GRU_NOTIF_DASHBOARD_MESSAGE = "module.identitystore.fccertifier.gru.notif.dashboard.message";
     private static final String MESSAGE_GRU_NOTIF_DASHBOARD_SUBJECT = "module.identitystore.fccertifier.gru.notif.dashboard.subject";
@@ -53,6 +55,14 @@ public class FranceConnectCertifier extends GruCertifier
     private static final String MESSAGE_GRU_NOTIF_EMAIL_MESSAGE = "module.identitystore.fccertifier.gru.notif.email.message";
     private static final String MESSAGE_GRU_NOTIF_AGENT_MESSAGE = "module.identitystore.fccertifier.gru.notif.agent.message";
     private static final String MESSAGE_GRU_NOTIF_AGENT_STATUS_TEXT = "module.identitystore.fccertifier.gru.notif.agent.statusText";
+    
+    /**
+	 * @param strCode
+	 */
+    public FranceConnectCertifier( String strCode )
+    {
+	    super( strCode );
+    }
     
     /**
      * {@inheritDoc} 

@@ -6,7 +6,7 @@
     
     <!-- Certifier -->
     <bean id="identitystore-fccertifier.certifier" class="fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.certifier.FranceConnectCertifier" >
-        <property name="code" value="fccertifier" />
+        <constructor-arg type="java.lang.String" value = "fccertifier"/>
         <property name="name" value="France Connect Certifier" />
         <property name="description" value="Certificateur d'attributs d'état civil à partir de FranceConnect" />
         <property name="certificateLevel" value="3" />
