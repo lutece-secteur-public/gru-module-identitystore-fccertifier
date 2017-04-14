@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><plug-in>
     <name>identitystore-fccertifier</name>
     <class>fr.paris.lutece.plugins.identitystore.modules.fccertifier.IdentityStoreFranceConnectCertifierPlugin</class>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <documentation/>
     <installation/>
     <changes/>
