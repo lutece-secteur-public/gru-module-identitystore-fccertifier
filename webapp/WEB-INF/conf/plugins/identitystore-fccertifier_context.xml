@@ -14,6 +14,7 @@
         <property name="iconUrl" value="images/admin/skin/plugins/identitystore/modules/fccertifier/franceconnect.png" />
         <property name="certifiableAttributesList">
             <list>
+                <value>gender</value>
                 <value>family_name</value>
                 <value>birthplace</value>
                 <value>birthdate</value>
@@ -23,7 +24,7 @@
                 <value>fc_birthplace</value>
                 <value>fc_birthdate</value>
                 <value>fc_given_name</value>
-                <value>fc_birthcountry</value>
+                <value>fc_birthcountry</value>         
             </list>
         </property>
         <property name="idDemandType" value="401" />
