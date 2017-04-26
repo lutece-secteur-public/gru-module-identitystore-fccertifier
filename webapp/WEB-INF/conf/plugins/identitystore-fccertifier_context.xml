@@ -15,6 +15,7 @@
         <property name="certifiableAttributesList">
             <list>
                 <value>gender</value>
+                <value>first_name</value>
                 <value>family_name</value>
                 <value>birthplace</value>
                 <value>birthdate</value>
