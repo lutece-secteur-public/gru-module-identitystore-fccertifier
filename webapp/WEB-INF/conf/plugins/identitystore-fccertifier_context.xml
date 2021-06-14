@@ -25,9 +25,16 @@
                 <value>fc_birthplace</value>
                 <value>fc_birthdate</value>
                 <value>fc_given_name</value>
-                <value>fc_birthcountry</value>         
+                <value>fc_birthcountry</value>
+          		<value>fc_sub</value>
+          		<value>fc_key</value>
             </list>
         </property>
+        <property name="generateAutomaticCertifierAttribute">
+			<map>
+				<entry key="fc_key" value-ref="identitystore-fccertifier.automaticFcKeyGenerator" />
+			</map>
+		</property>
         <property name="idDemandType" value="401" />
         <property name="idCloseCrmStatus" value="1" />
         <property name="idCloseDemandStatus" value="1" />
@@ -36,5 +43,14 @@
             <ref bean="identitystore-grucertifier.lib-notifygru.notificationService"/>
         </property>
     </bean>
+    
+     <bean id="identitystore-fccertifier.automaticFcKeyGenerator" class="fr.paris.lutece.plugins.identitystore.modules.fccertifier.service.certifier.AutomaticFcKeyGenerator">
+    	<property name="genderAttribute" value="fc_gender" />
+		<property name="firstNameAttribute" value="fc_given_name"/>
+		<property name="familyNameAttribute" value="fc_family_name"/>
+		<property name="birthplaceAttribute" value="fc_birthplace"/>
+		<property name="birthdateAttribute" value="fc_birthdate"/>
+		<property name="birthcountryAttribute" value="fc_birthcountry"/>
+     </bean>
     
 </beans>
