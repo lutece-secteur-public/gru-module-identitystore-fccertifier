@@ -99,44 +99,54 @@ public class AutomaticFcKeyGenerator implements IGenerateAutomaticCertifierAttri
 	
 	
 	/**
-	 * 
-	 * @param identityDTO the idedentity DTO Informations
-	 * @return true if the identity DTO contains informations necessary for adding the automatic certifier Attribute 
-	 */
-	@Override
-	public boolean mustBeGenerated(IdentityDto identityDTO,String strCertifierCode) {
+     * {@inheritDoc}
+     */
+    @Override
+	public boolean mustBeGenerated(IdentityDto identityDTO, String strCertifierCode) {
 
-		
-
-		return containsAttributeCertificated(identityDTO, _strGenderAttribute, strCertifierCode)
+		if (containsAttributeCertificated(identityDTO, _strGenderAttribute, strCertifierCode)
 				&& containsAttributeCertificated(identityDTO, _strFirstNameAttribute, strCertifierCode)
 				&& containsAttributeCertificated(identityDTO, _strFamilyNameAttribute, strCertifierCode)
 				&& containsAttributeCertificated(identityDTO, _strBirthplaceAttribute, strCertifierCode)
 				&& containsAttributeCertificated(identityDTO, _strBirthcountryAttribute, strCertifierCode)
-				&& containsAttributeCertificated(identityDTO, _strBirthdateAttribute, strCertifierCode);
+				&& containsAttributeCertificated(identityDTO, _strBirthdateAttribute, strCertifierCode)) {
+
+			try {
+				FCKeyService.validateKeyInformations(identityDTO.getAttributes().get(_strGenderAttribute).getValue(),
+						identityDTO.getAttributes().get(_strFirstNameAttribute).getValue(),
+						identityDTO.getAttributes().get(_strFamilyNameAttribute).getValue(),
+						identityDTO.getAttributes().get(_strBirthplaceAttribute).getValue(),
+						identityDTO.getAttributes().get(_strBirthcountryAttribute).getValue(),
+						identityDTO.getAttributes().get(_strBirthdateAttribute).getValue());
+				return true;
+			} catch (FCKeyException e) {
+				AppLogService.error("the FC key can not be generated for customer id "+ identityDTO.getCustomerId(), e);
+			}
+
+		}
+		return false;
 
 	}
 
-	/**
-	 * Gets the value.
-	 *
-	 * @param identityDto the identity dto
-	 * @return the value
-	 */
-	@Override
-	public String getValue(IdentityDto identityDto) {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+	public String getValue(IdentityDto identityDTO) {
 
 		
 		String strFcKey = "";
 		try {
-			strFcKey = FCKeyService.getKey(identityDto.getAttributes().get(_strGenderAttribute).getValue(),
-					identityDto.getAttributes().get(_strFirstNameAttribute).getValue(),
-					identityDto.getAttributes().get(_strFamilyNameAttribute).getValue(),
-					identityDto.getAttributes().get(_strBirthplaceAttribute).getValue(),
-					identityDto.getAttributes().get(_strBirthcountryAttribute).getValue(),
-					identityDto.getAttributes().get(_strBirthdateAttribute).getValue());
+			FCKeyService.getKey(identityDTO.getAttributes().get(_strGenderAttribute).getValue(),
+					identityDTO.getAttributes().get(_strFirstNameAttribute).getValue(),
+					identityDTO.getAttributes().get(_strFamilyNameAttribute).getValue(),
+					identityDTO.getAttributes().get(_strBirthplaceAttribute).getValue(),
+					identityDTO.getAttributes().get(_strBirthcountryAttribute).getValue(),
+					identityDTO.getAttributes().get(_strBirthdateAttribute).getValue());
+
 		} catch (FCKeyException e) {
-			AppLogService.error("Error during generate fc certifier key");
+			AppLogService.error("An error appear during FC key generation for customer id "+identityDTO.getCustomerId(),e);
 		}
 
 		return strFcKey;
