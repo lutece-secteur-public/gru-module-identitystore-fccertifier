@@ -138,7 +138,7 @@ public class AutomaticFcKeyGenerator implements IGenerateAutomaticCertifierAttri
 		
 		String strFcKey = "";
 		try {
-			FCKeyService.getKey(identityDTO.getAttributes().get(_strGenderAttribute).getValue(),
+		    strFcKey=FCKeyService.getKey(identityDTO.getAttributes().get(_strGenderAttribute).getValue(),
 					identityDTO.getAttributes().get(_strFirstNameAttribute).getValue(),
 					identityDTO.getAttributes().get(_strFamilyNameAttribute).getValue(),
 					identityDTO.getAttributes().get(_strBirthplaceAttribute).getValue(),
